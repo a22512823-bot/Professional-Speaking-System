@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practicum Academy (AJ) – Professional Speaking Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500;1,600;1,700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #08090d;
+  --surface: #111420;
+  --border: #1e2235;
+  --accent: #c9a84c;
+  --text: #eeeae0;
+  --muted: #505570;
+  --red: #e84a6a;
+  --green: #3ecf8e;
+
+  /* ── 4 BOLD PITCH COLOURS ── */
+  --loud-col:   #ffffff;          /* pure white — SHOUT */
+  --loud-bg:    rgba(255,255,255,0.08);
+  --normal-col: #f0d060;          /* warm yellow — speak */
+  --soft-col:   #7ec8e3;          /* sky blue — gentle */
+  --stress-col: #ff9f43;          /* orange — stressed syllable */
+}
+
+/* ── RESET scrolling ── */
+html { height: 100%; }
+body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'Cormorant Garamond', serif; user-select: none; }
+
+/* ══════════════════════════════
+   SETUP — full scroll enabled
+══════════════════════════════ */
+#setup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;           /* fill viewport */
+  overflow-y: auto;       /* scroll inside */
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 48px;
+  background: radial-gradient(ellipse 80% 30% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 60%);
+}
+
+/* brand */
+.brand-bar { width:100%; max-width:520px; display:flex; flex-direction:column; align-items:center; padding:24px 0 18px; border-bottom:1px solid var(--border); margin-bottom:18px; }
+.brand-row { display:flex; align-items:center; gap:11px; }
+.brand-emblem { width:38px; height:38px; border-radius:8px; background:linear-gradient(135deg,var(--accent) 0%,#8a6020 100%); display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:12px; font-weight:500; color:#08090d; letter-spacing:1px; flex-shrink:0; }
+.brand-main { font-size:18px; font-weight:700; color:var(--text); line-height:1; }
+.brand-main span { color:var(--accent); }
+.brand-sub { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-top:4px; }
+.brand-tagline { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:9px; text-align:center; line-height:1.6; }
+
+.app-title { font-size:clamp(22px,5vw,30px); font-weight:600; font-style:italic; text-align:center; line-height:1.2; color:var(--text); margin-bottom:16px; }
+.app-title span { color:var(--accent); }
+
+.box { width:100%; max-width:520px; display:flex; flex-direction:column; gap:12px; }
+
+textarea { width:100%; min-height:140px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px; color:var(--text); font-family:'Cormorant Garamond',serif; font-style:italic; font-size:15px; line-height:1.8; resize:vertical; outline:none; transition:border-color 0.2s; }
+textarea:focus { border-color:rgba(201,168,76,0.45); }
+textarea::placeholder { color:rgba(238,234,224,0.18); font-size:14px; }
+
+.meta { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); text-align:right; }
+.meta b { color:var(--accent); font-weight:400; }
+
+/* ── Pitch Legend ── */
+.pitch-legend { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; flex-direction:column; gap:9px; }
+.legend-title { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:2px; }
+.legend-row { display:flex; align-items:center; gap:10px; }
+.legend-swatch { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.legend-tag { font-family:'DM Mono',monospace; font-size:11px; border-radius:5px; padding:3px 10px; white-space:nowrap; border:1px solid; }
+.legend-desc { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
+
+/* colour swatches */
+.swatch-loud   { background:var(--loud-col); }
+.swatch-normal { background:var(--normal-col); }
+.swatch-soft   { background:var(--soft-col); }
+.swatch-stress { background:var(--stress-col); }
+.tag-loud   { color:var(--loud-col);   border-color:rgba(255,255,255,0.25);  background:rgba(255,255,255,0.06); }
+.tag-normal { color:var(--normal-col); border-color:rgba(240,208,96,0.35);   background:rgba(240,208,96,0.06); }
+.tag-soft   { color:var(--soft-col);   border-color:rgba(126,200,227,0.35);  background:rgba(126,200,227,0.06); }
+
+/* sec label */
+.sec-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:8px; }
+.sec-lbl::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.ctrl-row { display:flex; align-items:center; gap:10px; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:10px 13px; }
+.ctrl-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); white-space:nowrap; }
+input[type=range] { flex:1; appearance:none; height:3px; background:var(--border); border-radius:2px; outline:none; }
+input[type=range]::-webkit-slider-thumb { appearance:none; width:18px; height:18px; border-radius:50%; background:var(--accent); cursor:pointer; box-shadow:0 0 0 3px rgba(201,168,76,0.2); }
+.ctrl-val { font-family:'DM Mono',monospace; font-size:13px; color:var(--accent); width:64px; text-align:right; }
+
+.feat-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:13px 14px; display:flex; flex-direction:column; gap:11px; }
+.feat-top { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+
+/* Toggle */
+.tog-wrap { display:flex; align-items:center; gap:9px; cursor:pointer; }
+.tog-track { width:42px; height:22px; border-radius:11px; background:#181b28; border:1px solid var(--border); position:relative; flex-shrink:0; transition:background 0.22s, border-color 0.22s; }
+.tog-knob { position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:#3a3e52; transition:all 0.2s; }
+.tog-lbl { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); transition:color 0.2s; }
+.tog-track.is-on { background:rgba(201,168,76,0.22); border-color:var(--accent); }
+.tog-track.is-on .tog-knob { left:23px; background:var(--accent); }
+.tog-lbl.is-on { color:var(--accent); }
+
+.beat-vis { display:flex; gap:6px; margin-left:auto; }
+.beat-dot { width:8px; height:8px; border-radius:50%; background:var(--border); transition:background 0.05s, box-shadow 0.05s; }
+.beat-dot.flash { background:var(--accent); box-shadow:0 0 8px rgba(201,168,76,0.7); }
+
+.sound-picker { display:flex; gap:5px; }
+.sound-btn { flex:1; font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1px; text-transform:uppercase; border:1px solid var(--border); border-radius:7px; padding:8px 3px; cursor:pointer; background:transparent; color:var(--muted); transition:all 0.18s; text-align:center; }
+.sound-btn.active { background:rgba(201,168,76,0.1); border-color:rgba(201,168,76,0.5); color:var(--accent); }
+
+.rec-status-row { display:flex; align-items:center; gap:7px; margin-left:auto; }
+.rec-dot { width:9px; height:9px; border-radius:50%; background:#222; flex-shrink:0; transition:background 0.3s, box-shadow 0.3s; }
+.rec-dot.ready  { background:var(--green); box-shadow:0 0 6px rgba(62,207,142,0.5); }
+.rec-dot.denied { background:var(--red); }
+.rec-info-txt { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); letter-spacing:1px; }
+
+.preview-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:11px 13px; max-height:80px; overflow-y:auto; }
+.preview-title { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:6px; }
+.chip { display:inline-block; background:rgba(201,168,76,0.07); border:1px solid rgba(201,168,76,0.2); border-radius:5px; padding:2px 8px; margin:2px 3px 2px 0; font-style:italic; font-size:12px; color:rgba(238,234,224,0.55); }
+
+.btn-go { width:100%; background:var(--accent); color:#08090d; border:none; border-radius:12px; padding:17px; font-family:'DM Mono',monospace; font-size:12px; letter-spacing:4px; text-transform:uppercase; font-weight:500; cursor:pointer; transition:background 0.2s; margin-top:4px; }
+.btn-go:hover { background:#e0bf60; }
+
+.footer { width:100%; max-width:520px; margin-top:20px; padding-top:14px; border-top:1px solid var(--border); display:flex; flex-direction:column; align-items:center; gap:4px; }
+.footer-name { font-size:14px; font-weight:600; color:var(--muted); }
+.footer-email { font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1px; color:var(--accent); text-decoration:none; }
+.footer-email:hover { color:#e0bf60; }
+.footer-copy { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1px; color:var(--muted); margin-top:2px; }
+
+/* ══════════════════════════════
+   TELEPROMPTER
+══════════════════════════════ */
+#prompt { display:none; height:100vh; flex-direction:column; background:var(--bg); }
+#prompt.on { display:flex; }
+
+.hud { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:9px 12px; gap:8px; border-bottom:1px solid var(--border); background:var(--surface); }
+.hud-brand { display:flex; align-items:center; gap:7px; flex-shrink:0; }
+.hud-emblem { width:26px; height:26px; border-radius:5px; background:linear-gradient(135deg,var(--accent),#8a6020); display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:9px; font-weight:500; color:#08090d; letter-spacing:0.5px; }
+.hud-name { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); line-height:1.4; }
+.hud-center { display:flex; flex-direction:column; align-items:center; }
+.hud-timer { font-family:'DM Mono',monospace; font-size:20px; font-weight:300; color:var(--accent); line-height:1; }
+.hud-tiny { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:2px; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+.hud-prog-wrap { text-align:center; }
+.hud-prog { font-family:'DM Mono',monospace; font-size:10px; color:var(--muted); }
+.hud-bar { width:60px; height:2px; background:var(--border); border-radius:2px; margin:4px auto 0; overflow:hidden; }
+.hud-fill { height:100%; background:var(--accent); width:0%; border-radius:2px; transition:width 0.5s linear; }
+.hud-syl { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+.hud-syl-lbl { font-family:'DM Mono',monospace; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); }
+.hud-metro { display:none; flex-direction:column; align-items:center; gap:3px; }
+.metro-hud-bpm { font-family:'DM Mono',monospace; font-size:9px; color:var(--muted); }
+.metro-hud-dots { display:flex; gap:4px; }
+.metro-hud-dot { width:6px; height:6px; border-radius:50%; background:var(--border); transition:background 0.04s, box-shadow 0.04s; }
+.metro-hud-dot.flash { background:var(--accent); box-shadow:0 0 5px rgba(201,168,76,0.8); }
+.hud-rec { display:none; flex-direction:column; align-items:center; gap:3px; }
+.rec-live-dot { width:9px; height:9px; border-radius:50%; background:var(--red); animation:recpulse 1.2s ease-in-out infinite; }
+@keyframes recpulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.3;transform:scale(0.7)} }
+.rec-hud-time { font-family:'DM Mono',monospace; font-size:9px; color:rgba(232,74,106,0.8); }
+.hud-btns { display:flex; gap:5px; flex-shrink:0; }
+.hbtn { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:1px; text-transform:uppercase; border:1px solid; border-radius:6px; padding:6px 10px; cursor:pointer; background:transparent; transition:all 0.18s; white-space:nowrap; }
+.hbtn.p { color:var(--accent); border-color:rgba(201,168,76,0.3); }
+.hbtn.p:hover { background:rgba(201,168,76,0.1); }
+.hbtn.s { color:var(--muted); border-color:var(--border); }
+.hbtn.s:hover { background:rgba(255,255,255,0.03); }
+
+/* scroll viewport */
+.vp { flex:1; overflow:hidden; position:relative; }
+.vp::before { content:''; position:absolute; top:0; left:0; right:0; height:120px; z-index:10; pointer-events:none; background:linear-gradient(to bottom, var(--bg) 25%, transparent); }
+.vp::after  { content:''; position:absolute; bottom:0; left:0; right:0; height:80px;  z-index:10; pointer-events:none; background:linear-gradient(to top, var(--bg) 20%, transparent); }
+
+#rail { position:absolute; left:0; right:0; will-change:transform; text-align:center; padding:0 20px; }
+
+/* ── Clause container ── */
+.cl { display:block; padding:18px 0; line-height:1.6; }
+
+/* ── Word span ──
+   Key fix: words separated by spaces,
+   syllables joined with · separator INSIDE the word,
+   NO space between syllable spans — they are inline.
+   Each .w has a trailing space so words don't merge. */
+.w {
+  display: inline;          /* words flow naturally */
+  font-style: italic;
+  font-size: clamp(26px, 6.5vw, 42px);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+/* Add a real space after each word */
+.w::after { content: ' '; }
+
+/* pitch colours */
+.w.loud   { color: var(--loud-col);   font-weight: 700; font-size: clamp(30px,7.5vw,48px); text-shadow: 0 0 20px rgba(255,255,255,0.3); }
+.w.normal { color: var(--normal-col); }
+.w.soft   { color: var(--soft-col);   font-size: clamp(22px,5.5vw,36px); font-weight: 500; }
+
+/* Syllable separator · */
+.sep { color: rgba(255,255,255,0.2); font-size: 0.55em; vertical-align: middle; font-style: normal; margin: 0 1px; }
+
+/* Stressed syllable */
+.stressed { color: var(--stress-col); }
+.w.loud   .stressed { color: #fff; text-decoration: underline; text-decoration-color: rgba(255,200,100,0.5); text-underline-offset: 4px; }
+.w.soft   .stressed { color: #a0ddf0; }
+
+/* ══════════════════════════════
+   DONE SCREEN
+══════════════════════════════ */
+#done { display:none; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:40px 20px; gap:14px; text-align:center; background:var(--bg); }
+#done.on { display:flex; }
+.done-emblem { width:46px; height:46px; border-radius:10px; background:linear-gradient(135deg,var(--accent),#8a6020); display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:14px; font-weight:500; color:#08090d; letter-spacing:1px; }
+.done-brand-name { font-size:15px; font-weight:600; color:var(--muted); }
+.done-ttl { font-size:28px; font-style:italic; font-weight:700; color:var(--text); }
+.done-sub { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+.cards { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:14px 20px; min-width:88px; }
+.cv { font-family:'DM Mono',monospace; font-size:22px; color:var(--accent); }
+.cl-lbl { font-family:'DM Mono',monospace; font-size:9px; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+.btn-dl { display:none; align-items:center; justify-content:center; gap:8px; width:100%; max-width:320px; background:var(--red); color:#fff; border:none; border-radius:11px; padding:14px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:background 0.2s; }
+.btn-dl:hover { background:#f06080; }
+.btn-again { background:transparent; border:1px solid rgba(201,168,76,0.4); color:var(--accent); border-radius:10px; padding:12px 26px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; cursor:pointer; transition:background 0.2s; }
+.btn-again:hover { background:rgba(201,168,76,0.07); }
+.done-footer { display:flex; flex-direction:column; align-items:center; gap:3px; margin-top:4px; }
+.done-footer-name { font-size:13px; font-weight:600; color:var(--muted); }
+.done-footer-email { font-family:'DM Mono',monospace; font-size:10px; color:var(--accent); text-decoration:none; letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<!-- ══ SETUP ══ -->
+<div id="setup">
+  <div class="brand-bar">
+    <div class="brand-row">
+      <div class="brand-emblem">PA</div>
+      <div>
+        <div class="brand-main">Practicum Academy <span>(AJ)</span></div>
+        <div class="brand-sub">Professional Speaking System</div>
+      </div>
+    </div>
+    <div class="brand-tagline">Corporate Communication · English Fluency · Public Speaking</div>
+  </div>
+
+  <div class="app-title">Your <span>Progress,</span><br>Your Pace.</div>
+
+  <div class="box">
+    <textarea id="txt" placeholder="Paste your paragraph. Use *word* for LOUD and _word_ for soft…">Mastering the art of *professional* communication is a journey that requires both patience and _deliberate_ practice. Many people believe that speaking *faster* demonstrates intelligence or authority, but the opposite is often true. True experts understand that the most *impactful* messages are delivered with clarity, rhythm, and _purpose_. When you speak at a *steady* pace, you allow your audience to process complex information and connect with your ideas on a deeper level. Your voice is your most *powerful* tool. By slowing down and utilizing _strategic_ pauses, you command the room and project a sense of calm *confidence*. Remember, the goal is not just to be heard, but to be *understood*.</textarea>
+    <div class="meta"><b id="wc">0</b> words &nbsp;·&nbsp; <b id="cc">0</b> clauses &nbsp;·&nbsp; est. <b id="et">0s</b></div>
+
+    <!-- Pitch Colour Guide -->
+    <div class="pitch-legend">
+      <div class="legend-title">🎨 Pitch &amp; Volume Colour Guide</div>
+      <div class="legend-row">
+        <div class="legend-swatch swatch-loud"></div>
+        <span class="legend-tag tag-loud">*word*</span>
+        <span class="legend-desc">WHITE — speak LOUD &amp; bold</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-swatch swatch-normal"></div>
+        <span class="legend-tag tag-normal">word</span>
+        <span class="legend-desc">YELLOW — normal speaking tone</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-swatch swatch-soft"></div>
+        <span class="legend-tag tag-soft">_word_</span>
+        <span class="legend-desc">BLUE — speak softly &amp; gently</span>
+      </div>
+      <div class="legend-row">
+        <div class="legend-swatch swatch-stress"></div>
+        <span class="legend-tag" style="color:var(--stress-col);border-color:rgba(255,159,67,0.4);background:rgba(255,159,67,0.07);">syl·LA·ble</span>
+        <span class="legend-desc">ORANGE — stressed syllable</span>
+      </div>
+    </div>
+
+    <div class="ctrl-row">
+      <span class="ctrl-lbl">Reading Speed</span>
+      <input type="range" id="wpmR" min="60" max="220" value="150" step="5">
+      <span class="ctrl-val" id="wv">150 wpm</span>
+    </div>
+
+    <div class="sec-lbl">Syllable Mode</div>
+    <div class="feat-box">
+      <div class="feat-top">
+        <div class="tog-wrap" id="sylToggle">
+          <div class="tog-track is-on" id="sylTrack"><div class="tog-knob"></div></div>
+          <span class="tog-lbl is-on" id="sylLbl">On</span>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.7;margin-left:4px;">
+          Words shown as: <span style="color:var(--normal-col)">pro·FES·sion·al</span><br>
+          <span style="color:var(--stress-col)">Orange</span> = stressed syllable to emphasise
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-lbl">Metronome</div>
+    <div class="feat-box">
+      <div class="feat-top">
+        <div class="tog-wrap" id="metroToggle">
+          <div class="tog-track" id="metroTrack"><div class="tog-knob"></div></div>
+          <span class="tog-lbl" id="metroLbl">Off</span>
+        </div>
+        <div class="beat-vis" id="beatVis"></div>
+      </div>
+      <div class="ctrl-row" style="border:none;padding:0;background:transparent;">
+        <span class="ctrl-lbl">BPM</span>
+        <input type="range" id="bpmR" min="40" max="200" value="60" step="1">
+        <span class="ctrl-val" id="bv">60 bpm</span>
+      </div>
+      <div class="sound-picker" id="soundPicker">
+        <button class="sound-btn active" data-sound="click">🎵 Click</button>
+        <button class="sound-btn" data-sound="beep">📡 Beep</button>
+        <button class="sound-btn" data-sound="soft">🔔 Soft</button>
+        <button class="sound-btn" data-sound="wood">🪘 Wood</button>
+      </div>
+    </div>
+
+    <div class="sec-lbl">Voice Recorder</div>
+    <div class="feat-box">
+      <div class="feat-top">
+        <div class="tog-wrap" id="recToggle">
+          <div class="tog-track" id="recTrack"><div class="tog-knob"></div></div>
+          <span class="tog-lbl" id="recLbl">Off</span>
+        </div>
+        <div class="rec-status-row">
+          <div class="rec-dot" id="recDot"></div>
+          <span class="rec-info-txt" id="recInfo">tap to enable</span>
+        </div>
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);line-height:1.7;">
+        Records your voice during the session.<br>
+        Audio file auto-downloads when session ends.
+      </div>
+    </div>
+
+    <div class="preview-box">
+      <div class="preview-title">Detected Clauses</div>
+      <div id="chips"></div>
+    </div>
+
+    <button class="btn-go" id="btnGo">▶ &nbsp;Begin Session</button>
+
+    <div class="footer">
+      <div class="footer-name">Practicum Academy (AJ)</div>
+      <a class="footer-email" href="mailto:practicumacademy.aj@gmail.com">practicumacademy.aj@gmail.com</a>
+      <div class="footer-copy">© 2025 Practicum Academy · All rights reserved</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TELEPROMPTER ══ -->
+<div id="prompt">
+  <div class="hud">
+    <div class="hud-brand">
+      <div class="hud-emblem">PA</div>
+      <div class="hud-name">Practicum<br>Academy (AJ)</div>
+    </div>
+    <div class="hud-center">
+      <div class="hud-timer" id="htimer">—</div>
+      <div class="hud-tiny">remaining</div>
+    </div>
+    <div class="hud-prog-wrap">
+      <div class="hud-prog" id="hprog">0 / 0</div>
+      <div class="hud-bar"><div class="hud-fill" id="hfill"></div></div>
+      <div class="hud-tiny" style="margin-top:3px">clauses</div>
+    </div>
+    <div class="hud-syl" id="hudSyl" title="Toggle syllable mode">
+      <div class="tog-wrap" id="hudSylToggle">
+        <div class="tog-track is-on" id="hudSylTrack" style="width:34px;height:18px;"><div class="tog-knob" style="width:12px;height:12px;top:2px;left:2px;"></div></div>
+      </div>
+      <div class="hud-syl-lbl" id="hudSylLbl">SYL ON</div>
+    </div>
+    <div class="hud-metro" id="hudMetro">
+      <div class="metro-hud-bpm" id="hudBpm">— bpm</div>
+      <div class="metro-hud-dots" id="hudDots"></div>
+    </div>
+    <div class="hud-rec" id="hudRec">
+      <div class="rec-live-dot"></div>
+      <div class="rec-hud-time" id="recClock">0:00</div>
+    </div>
+    <div class="hud-btns">
+      <button class="hbtn p" id="btnP">⏸ Pause</button>
+      <button class="hbtn s" id="btnS">■ Stop</button>
+    </div>
+  </div>
+  <div class="vp" id="vp">
+    <div id="rail"></div>
+  </div>
+</div>
+
+<!-- ══ DONE ══ -->
+<div id="done">
+  <div class="done-emblem">PA</div>
+  <div class="done-brand-name">Practicum Academy (AJ)</div>
+  <div class="done-ttl">Session Complete!</div>
+  <div class="done-sub">Well done — keep practising</div>
+  <div class="cards">
+    <div class="card"><div class="cv" id="dw">—</div><div class="cl-lbl">Words</div></div>
+    <div class="card"><div class="cv" id="dt">—</div><div class="cl-lbl">Time</div></div>
+    <div class="card"><div class="cv" id="dv">—</div><div class="cl-lbl">WPM</div></div>
+  </div>
+  <button class="btn-dl" id="btnDl">⬇ &nbsp;Download Recording</button>
+  <button class="btn-again" id="btnA">↩ Practice Again</button>
+  <div class="done-footer">
+    <div class="done-footer-name">Practicum Academy (AJ)</div>
+    <a class="done-footer-email" href="mailto:practicumacademy.aj@gmail.com">practicumacademy.aj@gmail.com</a>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════
+   SYLLABLE ENGINE
+══════════════════════════════════ */
+function syllabify(word) {
+  if (word.length <= 3) return [word];
+  const vowels = 'aeiouy';
+  const isV = c => vowels.includes(c.toLowerCase());
+  const lo = word.toLowerCase();
+  const syls = [];
+  let buf = '', i = 0;
+  while (i < lo.length) {
+    buf += word[i];
+    if (i < lo.length - 2) {
+      const c=lo[i], n=lo[i+1], n2=lo[i+2];
+      if (isV(c) && !isV(n)) {
+        if (isV(n2)) { syls.push(buf); buf=''; }
+        else if (i < lo.length - 3 && !isV(lo[i+3])) { buf+=word[i+1]; i++; syls.push(buf); buf=''; }
+      }
+    }
+    i++;
+  }
+  if (buf) syls.push(buf);
+  // fallback for single chunk long words
+  if (syls.length === 1 && word.length >= 5) {
+    const m = Math.ceil(word.length / 2);
+    return [word.slice(0,m), word.slice(m)];
+  }
+  return syls.length ? syls : [word];
+}
+
+function stressIdx(syls) {
+  if (syls.length <= 1) return 0;
+  const last = syls[syls.length-1].toLowerCase();
+  if (/tion$|sion$|ient$|ial$/.test(last) && syls.length >= 3) return syls.length-3;
+  if (syls.length === 2) return 0;
+  return syls.length - 2;
+}
+
+/* ══════════════════════════════════
+   TEXT PARSER
+══════════════════════════════════ */
+function parseTokens(rawClause) {
+  return rawClause.trim().split(/\s+/).map(w => {
+    if (/^\*[^*]+\*$/.test(w)) return { pitch:'loud',   clean: w.slice(1,-1).replace(/[.,!?;:]+$/,''), punct: w.slice(1,-1).match(/[.,!?;:]+$/)?.[0]||'' };
+    if (/^_[^_]+_$/.test(w))   return { pitch:'soft',   clean: w.slice(1,-1).replace(/[.,!?;:]+$/,''), punct: w.slice(1,-1).match(/[.,!?;:]+$/)?.[0]||'' };
+    return                             { pitch:'normal', clean: w.replace(/[.,!?;:]+$/,''),              punct: w.match(/[.,!?;:]+$/)?.[0]||'' };
+  }).filter(t => t.clean.length > 0);
+}
+
+function renderWord(token, sylMode) {
+  const {pitch, clean, punct} = token;
+  let inner;
+  if (sylMode && clean.length > 2) {
+    const syls = syllabify(clean);
+    const si   = stressIdx(syls);
+    inner = syls.map((s,i) => {
+      const sc = i === si ? 'stressed' : '';
+      const sep = i < syls.length-1 ? '<span class="sep">·</span>' : '';
+      return `<span class="${sc}">${s}</span>${sep}`;
+    }).join('');
+  } else {
+    inner = clean;
+  }
+  const p = punct ? `<span style="font-style:normal;color:var(--muted);font-size:0.7em">${punct}</span>` : '';
+  return `<span class="w ${pitch}">${inner}${p}</span>`;
+}
+
+/* ══════════════════════════════════
+   CLAUSE SPLITTER
+══════════════════════════════════ */
+function stripM(t) { return t.replace(/\*([^*]+)\*/g,'$1').replace(/_([^_]+)_/g,'$1'); }
+
+function splitRaw(rawText) {
+  const plain = stripM(rawText).replace(/\s+/g,' ').trim();
+  const sents = plain.split(/(?<=[.!?])\s+/);
+  const plainClauses = [];
+  sents.forEach(s => {
+    s = s.trim(); if(!s) return;
+    if(s.split(/\s+/).length <= 12){plainClauses.push(s);return;}
+    const parts = s.split(/(?<=,|;|:|—|–)\s*/); let buf='';
+    parts.forEach((p,i)=>{
+      p=p.trim(); if(!p) return;
+      if(!buf){buf=p;return;}
+      if(buf.split(/\s+/).length<5){buf+=' '+p;}else{plainClauses.push(buf);buf=p;}
+      if(i===parts.length-1&&buf){plainClauses.push(buf);buf='';}
+    });
+    if(buf) plainClauses.push(buf);
+  });
+  const merged=[];
+  for(let i=0;i<plainClauses.length;i++){
+    if(plainClauses[i].split(/\s+/).length<3&&i<plainClauses.length-1){plainClauses[i+1]=plainClauses[i]+' '+plainClauses[i+1];}
+    else merged.push(plainClauses[i]);
+  }
+  // Now re-map raw words to these clause boundaries
+  const rawWords = rawText.trim().split(/\s+/);
+  const result=[]; let wi=0;
+  merged.forEach(pc=>{
+    const n=pc.trim().split(/\s+/).length;
+    result.push(rawWords.slice(wi,wi+n).join(' '));
+    wi+=n;
+  });
+  return result.filter(c=>c.trim());
+}
+
+function wcount(s){return stripM(s).trim().split(/\s+/).filter(Boolean).length;}
+function fmt(s){s=Math.max(0,Math.ceil(s));const m=Math.floor(s/60),sec=s%60;return m>0?`${m}:${sec.toString().padStart(2,'0')}`:`${sec}s`;}
+
+/* ══════════════════════════════════
+   DOM HELPERS
+══════════════════════════════════ */
+const $=id=>document.getElementById(id);
+function setTog(track,lbl,on){
+  if(on){track.classList.add('is-on');lbl.classList.add('is-on');lbl.textContent='On';}
+  else{track.classList.remove('is-on');lbl.classList.remove('is-on');lbl.textContent='Off';}
+}
+function buildDots(el,cls){el.innerHTML='';for(let i=0;i<4;i++){const d=document.createElement('div');d.className=cls;el.appendChild(d);}}
+buildDots($('beatVis'),'beat-dot');
+buildDots($('hudDots'),'metro-hud-dot');
+
+/* ══════════════════════════════════
+   METRONOME
+══════════════════════════════════ */
+let audioCtx=null,metroOn=false,bpm=60,soundType='click',nextBeatTime=0,beatCount=0,schedTimer=null;
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function playBeat(t,a){
+  const ctx=getCtx(),g=ctx.createGain();g.connect(ctx.destination);
+  if(soundType==='click'){const buf=ctx.createBuffer(1,ctx.sampleRate*.03,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*(1-i/d.length);const s=ctx.createBufferSource();s.buffer=buf;const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=a?1800:1200;f.Q.value=.5;s.connect(f);f.connect(g);g.gain.setValueAtTime(a?.9:.6,t);g.gain.exponentialRampToValueAtTime(.001,t+.03);s.start(t);s.stop(t+.04);}
+  else if(soundType==='beep'){const o=ctx.createOscillator();o.type='sine';o.frequency.value=a?1000:700;o.connect(g);g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(a?.4:.25,t+.005);g.gain.exponentialRampToValueAtTime(.001,t+.08);o.start(t);o.stop(t+.09);}
+  else if(soundType==='soft'){const o=ctx.createOscillator();o.type='sine';o.frequency.value=a?880:660;o.connect(g);g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.001,t+.3);o.start(t);o.stop(t+.35);}
+  else{const buf=ctx.createBuffer(1,ctx.sampleRate*.05,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*.3));const s=ctx.createBufferSource();s.buffer=buf;const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=a?600:400;f.Q.value=8;s.connect(f);f.connect(g);g.gain.setValueAtTime(a?1:.65,t);g.gain.exponentialRampToValueAtTime(.001,t+.05);s.start(t);s.stop(t+.06);}
+}
+function flashDot(idx,ds){setTimeout(()=>{document.querySelectorAll('.beat-dot').forEach((d,i)=>d.classList.toggle('flash',i===idx));document.querySelectorAll('.metro-hud-dot').forEach((d,i)=>d.classList.toggle('flash',i===idx));setTimeout(()=>document.querySelectorAll('.beat-dot,.metro-hud-dot').forEach(d=>d.classList.remove('flash')),80);},Math.max(0,ds*1000));}
+function scheduleBeat(){const ctx=getCtx(),iv=60/bpm;while(nextBeatTime<ctx.currentTime+.1){const a=beatCount%4===0;playBeat(nextBeatTime,a);flashDot(beatCount%4,nextBeatTime-ctx.currentTime);beatCount++;nextBeatTime+=iv;}}
+function startMetro(){if(!metroOn)return;const ctx=getCtx();if(ctx.state==='suspended')ctx.resume();beatCount=0;nextBeatTime=ctx.currentTime+.05;scheduleBeat();schedTimer=setInterval(scheduleBeat,25);}
+function stopMetro(){clearInterval(schedTimer);schedTimer=null;}
+
+$('metroToggle').addEventListener('click',()=>{metroOn=!metroOn;setTog($('metroTrack'),$('metroLbl'),metroOn);if(metroOn){getCtx();startMetro();}else{stopMetro();document.querySelectorAll('.beat-dot').forEach(d=>d.classList.remove('flash'));}});
+$('bpmR').addEventListener('input',()=>{bpm=parseInt($('bpmR').value);$('bv').textContent=bpm+' bpm';if(metroOn&&schedTimer){stopMetro();startMetro();}});
+$('soundPicker').addEventListener('click',e=>{const btn=e.target.closest('.sound-btn');if(!btn)return;document.querySelectorAll('.sound-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');soundType=btn.dataset.sound;const ctx=getCtx();playBeat(ctx.currentTime+.01,true);});
+
+/* ══════════════════════════════════
+   RECORDER
+══════════════════════════════════ */
+let recOn=false,stream=null,recorder=null,recChunks=[],recBlob=null,recClockIv=null,recStartMs=0,dlUrl=null;
+async function enableMic(){try{stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});$('recDot').className='rec-dot ready';$('recInfo').textContent='mic ready ✓';return true;}catch(e){$('recDot').className='rec-dot denied';$('recInfo').textContent='mic denied ✗';return false;}}
+function disableMic(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('recDot').className='rec-dot';$('recInfo').textContent='tap to enable';}
+function startRec(){if(!recOn||!stream)return;recChunks=[];recBlob=null;if(dlUrl){URL.revokeObjectURL(dlUrl);dlUrl=null;}const mime=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported(t))||'';recorder=new MediaRecorder(stream,mime?{mimeType:mime}:{});recorder.ondataavailable=e=>{if(e.data&&e.data.size>0)recChunks.push(e.data);};recorder.onstop=()=>{recBlob=new Blob(recChunks,{type:recorder.mimeType||'audio/webm'});dlUrl=URL.createObjectURL(recBlob);showDownload();};recorder.start(100);$('hudRec').style.display='flex';recStartMs=Date.now();recClockIv=setInterval(()=>{const s=Math.floor((Date.now()-recStartMs)/1000);$('recClock').textContent=`${Math.floor(s/60)}:${(s%60).toString().padStart(2,'0')}`;},500);}
+function stopRec(){clearInterval(recClockIv);$('hudRec').style.display='none';if(recorder&&recorder.state!=='inactive')recorder.stop();}
+function showDownload(){if(!dlUrl)return;const btn=$('btnDl');btn.style.display='flex';btn.onclick=()=>{const ext=recBlob.type.includes('ogg')?'ogg':'webm';const ts=new Date().toISOString().slice(0,19).replace(/[T:]/g,'-');const a=document.createElement('a');a.href=dlUrl;a.download=`practicum-academy-aj-${ts}.${ext}`;document.body.appendChild(a);a.click();document.body.removeChild(a);};}
+$('recToggle').addEventListener('click',async()=>{if(!recOn){const ok=await enableMic();if(ok){recOn=true;setTog($('recTrack'),$('recLbl'),true);}}else{recOn=false;setTog($('recTrack'),$('recLbl'),false);disableMic();}});
+
+/* ══════════════════════════════════
+   SYLLABLE TOGGLE
+══════════════════════════════════ */
+let sylMode=true;
+function syncSylUI(){
+  const on=sylMode;
+  [$('sylTrack')].forEach(t=>{on?t.classList.add('is-on'):t.classList.remove('is-on');});
+  [$('sylLbl')].forEach(l=>{on?l.classList.add('is-on'):l.classList.remove('is-on');l.textContent=on?'On':'Off';});
+  $('hudSylTrack').classList.toggle('is-on',on);
+  $('hudSylLbl').textContent=on?'SYL ON':'SYL OFF';
+}
+$('sylToggle').addEventListener('click',()=>{sylMode=!sylMode;syncSylUI();refreshSetup();});
+$('hudSylToggle').addEventListener('click',()=>{sylMode=!sylMode;syncSylUI();rebuildRail();});
+
+/* ══════════════════════════════════
+   SETUP
+══════════════════════════════════ */
+let rawClauses=[];
+function refreshSetup(){
+  const wpm=parseInt($('wpmR').value);$('wv').textContent=wpm+' wpm';
+  rawClauses=splitRaw($('txt').value);
+  const tw=rawClauses.reduce((a,c)=>a+wcount(c),0);
+  $('wc').textContent=tw;$('cc').textContent=rawClauses.length;$('et').textContent=fmt((tw/wpm)*60);
+  $('chips').innerHTML='';
+  rawClauses.forEach(c=>{const ch=document.createElement('span');ch.className='chip';ch.textContent=stripM(c);$('chips').appendChild(ch);});
+}
+$('txt').addEventListener('input',refreshSetup);
+$('wpmR').addEventListener('input',refreshSetup);
+refreshSetup();
+
+/* ══════════════════════════════════
+   ENGINE
+══════════════════════════════════ */
+let rafId=null,sessionStart=0,pauseOffset=0,pauseStamp=0,paused=false;
+let totalMs=0,totalWords=0,pxPerMs=0,startY=0,endY=0,lastIdx=-1,clauseTopY=[];
+
+function buildRail(){
+  $('rail').innerHTML='';clauseTopY=[];
+  rawClauses.forEach(rc=>{
+    const tokens=parseTokens(rc);
+    const el=document.createElement('div');
+    el.className='cl';
+    // Join words — each .w has ::after space, so no extra space needed
+    el.innerHTML=tokens.map(t=>renderWord(t,sylMode)).join('');
+    $('rail').appendChild(el);
+  });
+}
+
+function rebuildRail(){
+  Array.from($('rail').children).forEach((el,i)=>{
+    if(!rawClauses[i])return;
+    el.innerHTML=parseTokens(rawClauses[i]).map(t=>renderWord(t,sylMode)).join('');
+  });
+}
+
+function computeLayout(){
+  const vpH=$('vp').clientHeight,railH=$('rail').scrollHeight;
+  startY=vpH;endY=-railH;
+  Array.from($('rail').children).forEach(el=>clauseTopY.push(el.offsetTop));
+  totalWords=rawClauses.reduce((a,c)=>a+wcount(c),0);
+  totalMs=(totalWords/parseInt($('wpmR').value))*60*1000;
+  pxPerMs=(endY-startY)/totalMs;
+  $('rail').style.transform=`translateY(${startY}px)`;
+}
+
+function tick(now){
+  const el=now-sessionStart-pauseOffset;
+  if(el>=totalMs){$('rail').style.transform=`translateY(${endY}px)`;endSession(el);return;}
+  const ty=startY+pxPerMs*el;$('rail').style.transform=`translateY(${ty}px)`;
+  const rl=($('vp').clientHeight*.67)-ty;
+  let ai=0;for(let i=clauseTopY.length-1;i>=0;i--){if(clauseTopY[i]<=rl){ai=i;break;}}
+  if(ai!==lastIdx){lastIdx=ai;$('hprog').textContent=`${ai+1} / ${rawClauses.length}`;$('hfill').style.width=((ai+1)/rawClauses.length*100)+'%';}
+  $('htimer').textContent=fmt((totalMs-el)/1000);
+  rafId=requestAnimationFrame(tick);
+}
+
+function startSession(){
+  rawClauses=splitRaw($('txt').value);
+  if(!rawClauses.length){alert('Enter some text first.');return;}
+  paused=false;pauseOffset=0;lastIdx=-1;recBlob=null;
+  $('btnDl').style.display='none';
+  buildRail();stopMetro();
+  $('setup').style.display='none';$('done').classList.remove('on');$('prompt').classList.add('on');
+  syncSylUI();
+  if(metroOn){$('hudMetro').style.display='flex';$('hudBpm').textContent=bpm+' bpm';buildDots($('hudDots'),'metro-hud-dot');}
+  else $('hudMetro').style.display='none';
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    computeLayout();sessionStart=performance.now();
+    if(metroOn)startMetro();if(recOn)startRec();
+    rafId=requestAnimationFrame(tick);
+  }));
+}
+
+function endSession(elMs){
+  cancelAnimationFrame(rafId);stopMetro();stopRec();
+  $('dw').textContent=totalWords;
+  $('dt').textContent=(elMs/1000).toFixed(1)+'s';
+  $('dv').textContent=Math.round((totalWords/elMs)*60000);
+  $('prompt').classList.remove('on');$('done').classList.add('on');
+}
+
+function goToSetup(){cancelAnimationFrame(rafId);stopMetro();stopRec();paused=false;$('prompt').classList.remove('on');$('done').classList.remove('on');$('setup').style.display='flex';$('btnP').textContent='⏸ Pause';refreshSetup();}
+
+function togglePause(){
+  if(!paused){paused=true;pauseStamp=performance.now();cancelAnimationFrame(rafId);stopMetro();stopRec();$('btnP').textContent='▶ Resume';}
+  else{paused=false;pauseOffset+=performance.now()-pauseStamp;$('btnP').textContent='⏸ Pause';if(metroOn)startMetro();if(recOn)startRec();rafId=requestAnimationFrame(tick);}
+}
+
+$('btnGo').addEventListener('click',startSession);
+$('btnP').addEventListener('click',togglePause);
+$('btnS').addEventListener('click',()=>endSession(Math.max(1000,performance.now()-sessionStart-pauseOffset)));
+$('btnA').addEventListener('click',goToSetup);
+</script>
+</body>
+</html>
